@@ -1,0 +1,4 @@
+import { runtime,json,sameOrigin,readJson } from '../../../lib/server';
+import { cleanEvent } from '../../../lib/recruitment.mjs';
+export const dynamic='force-dynamic';
+export async function POST(req:Request){if(!sameOrigin(req))return json({error:'forbidden'},403);let data;try{data=await readJson(req,2000)}catch{return json({error:'invalid_event'},400)}const event=cleanEvent(data);if(!event)return json({error:'invalid_event'},400);try{const db=runtime().DB;if(!db)return json({error:'unavailable'},503);await db.prepare('INSERT INTO events (id,event,source,entry,stage,outcome,created_at) VALUES (?,?,?,?,?,?,?) ON CONFLICT(id) DO NOTHING').bind(event.id,event.event,event.source,event.entry,event.stage,event.outcome,new Date().toISOString()).run();return json({recorded:true})}catch{return json({error:'unavailable'},503)}}
