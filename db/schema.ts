@@ -1,0 +1,13 @@
+import { integer,sqliteTable,text,index } from 'drizzle-orm/sqlite-core';
+export const applications=sqliteTable('applications',{
+ id:text('id').primaryKey(),submissionKey:text('submission_key').notNull().unique(),payloadHash:text('payload_hash').notNull(),createdAt:text('created_at').notNull(),name:text('name').notNull(),contact:text('contact').notNull(),contactMethod:text('contact_method').notNull().default(''),dob:text('dob').notNull(),job:text('job').notNull(),readiness:text('readiness').notNull(),education:text('education').notNull(),source:text('source').notNull(),entry:text('entry').notNull(),consentVersion:text('consent_version').notNull(),consentText:text('consent_text').notNull(),recipient:text('recipient').notNull(),status:text('status').notNull().default('Новая'),searchText:text('search_text').notNull().default('')
+},t=>[index('applications_created_idx').on(t.createdAt)]);
+export const events=sqliteTable('events',{
+ id:text('id').primaryKey(),event:text('event').notNull(),source:text('source').notNull(),entry:text('entry').notNull(),stage:text('stage').notNull(),outcome:text('outcome').notNull(),createdAt:text('created_at').notNull()
+},t=>[index('events_created_idx').on(t.createdAt)]);
+export const intakeLimits=sqliteTable('intake_limits',{key:text('key').primaryKey(),count:integer('count').notNull(),expiresAt:integer('expires_at').notNull()});
+
+export const hrUsers=sqliteTable('hr_users',{id:text('id').primaryKey(),passwordHash:text('password_hash').notNull(),mustChange:integer('must_change').notNull().default(1),passwordVersion:integer('password_version').notNull().default(1),updatedAt:text('updated_at').notNull()});
+export const hrSessions=sqliteTable('hr_sessions',{tokenHash:text('token_hash').primaryKey(),userId:text('user_id').notNull(),passwordVersion:integer('password_version').notNull(),createdAt:integer('created_at').notNull(),expiresAt:integer('expires_at').notNull()});
+export const hrLoginLimits=sqliteTable('hr_login_limits',{key:text('key').primaryKey(),count:integer('count').notNull(),expiresAt:integer('expires_at').notNull()});
+export const mailOutbox=sqliteTable('mail_outbox',{applicationId:text('application_id').primaryKey(),state:text('state').notNull().default('pending'),attempts:integer('attempts').notNull().default(0),payloadJson:text('payload_json'),providerId:text('provider_id'),lastError:text('last_error'),firstAttemptAt:integer('first_attempt_at'),nextAttemptAt:integer('next_attempt_at').notNull().default(0),lockToken:text('lock_token'),leaseUntil:integer('lease_until').notNull().default(0),updatedAt:text('updated_at').notNull()});
