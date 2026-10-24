@@ -1,0 +1,3 @@
+import type { Metadata } from "next";
+export const metadata:Metadata={title:"Первая смена — практика и работа в Очаково",description:"Проверь пробу, запусти линию, собери заказ — или сразу заполни анкету на практику."};
+export default function Layout({children}:{children:React.ReactNode}){return <html lang="ru"><head><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content"/><meta name="theme-color" content="#D50032"/><link rel="stylesheet" href="/style.css"/><link rel="stylesheet" href="/map-v7.css"/><link rel="stylesheet" href="/forms-v7.css"/><link rel="stylesheet" href="/release-v8.css"/></head><body>{children}</body></html>}
