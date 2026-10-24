@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import {config,validateApplication,cleanEvent,storeApplication} from '../lib/recruitment.mjs';
+import {database,testEnv as env} from './d1-adapter.mjs';
+assert.equal(config({}).active,false);for(const key of ['APPLICATIONS_ENABLED','APPLICATION_CONSENT_TEXT','APPLICATION_CONSENT_VERSION','HR_PASSWORD_PEPPER']){const missing={...env};delete missing[key];assert.equal(config(missing).active,false,key)}
+assert.equal(config({...env,APPLICATION_DELIVERY:'cabinet',RESEND_API_KEY:'',MAIL_FROM:''}).active,true);assert.equal(config({...env,APPLICATION_DELIVERY:'cabinet'}).notifications,false);
+const base={name:'Тестовый Кандидат',contactMethod:'email',contact:'candidate@example.test',dob:'2004-06-15',job:'undecided',readiness:'В течение месяца',education:'Тестовый колледж',source:'direct',entry:'home',submissionKey:crypto.randomUUID(),consentVersion:'test-1'};
+const now=new Date('2026-10-23T12:00:00Z');assert.deepEqual(validateApplication(base,now),{});
+for(const dob of ['2008-10-24','2030-01-01','2004-02-30',{},12,null])assert.ok(validateApplication({...base,dob},now).dob);
+assert.deepEqual(validateApplication({...base,dob:'2008-10-23'},now),{});
+assert.deepEqual(validateApplication({...base,contactMethod:'tel',contact:'+7 (999) 123-45-67'},now),{});
+assert.ok(validateApplication({...base,contactMethod:'tel'},now).contact);assert.ok(validateApplication({...base,contactMethod:'email',contact:'+7 999 123-45-67'},now).contact);
+for(const key of ['name','contact','job','readiness','education'])assert.ok(validateApplication({...base,[key]:null},now)[key]);
+const event={id:crypto.randomUUID(),event:'form_open',source:'university',entry:'lab',stage:'lab',outcome:'none'};
+assert.deepEqual(cleanEvent(event),event);for(const extras of [{name:'Private'},{contact:'private@example.test'},{event:'application_success'},{source:'raw-private-utm'}])assert.equal(cleanEvent({...event,...extras}),null);
+const {db,sql}=database();const first=await storeApplication(db,base,config(env));assert.ok(first.id);assert.equal(first.replayed,false);
+const replay=await storeApplication(db,base,config(env));assert.equal(replay.id,first.id);assert.equal(replay.replayed,true);
+assert.equal((await storeApplication(db,{...base,job:'lab'},config(env))).conflict,true);
+assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM applications').get().n,1);assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM events').get().n,1);assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM mail_outbox').get().n,1);
+const row=sql.prepare('SELECT * FROM applications').get();assert.equal(row.contact_method,'email');assert.equal(row.consent_text,env.APPLICATION_CONSENT_TEXT);assert.equal(row.contact,base.contact);
+const eventRow=sql.prepare('SELECT * FROM events').get();assert.equal('contact' in eventRow,false);assert.equal('name' in eventRow,false);
+await assert.rejects(()=>storeApplication({...db,async batch(){throw Error('network')}},{...base,submissionKey:crypto.randomUUID()},config(env)));assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM applications').get().n,1);
+console.log('PASS: server validation, contact choice, consent prerequisites, PII-free events, atomic application+outbox, retry idempotency, conflict, failed-write handling.');

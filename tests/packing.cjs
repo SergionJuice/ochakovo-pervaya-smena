@@ -1,0 +1,32 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const source = fs.readFileSync('public/app.js','utf8');
+const fn = source.match(/function packingValid\(slots\)\{[^}]+\}/)[0];
+const valid = vm.runInNewContext('('+fn+')');
+assert.equal(valid(['kvass','mojito','kvass','kvass','mojito','kvass']), true, 'Mixed ordering is accepted');
+assert.equal(valid(['kvass','kvass','kvass','kvass','mojito','mojito']), true, 'Grouped ordering is accepted');
+assert.equal(valid(['kvass','kvass','kvass','kvass','mojito']), false, 'Incomplete package rejected');
+assert.equal(valid(['kvass','kvass','kvass','kvass','mojito','mojito','mojito']), false, 'Overfilled package rejected');
+assert.equal(valid(Array(6).fill('kvass')), false, 'Wrong recipe rejected');
+assert.equal(valid(['kvass','kvass','kvass','kvass','mojito','unknown']), false, 'Unknown product rejected');
+console.log('PASS: 6 order checks (composition, arbitrary order, capacity, product types).');
+
+// Repeated adds and explicit destinations must never remove existing items.
+const addSource=source.slice(source.indexOf('function addBottle('),source.indexOf('function shipOrder('));
+const ctx={state:{warehouse:{selected:'kvass',slots:Array(6).fill(null),phase:'packing'}},setSpeech(){},toast(){},sound(){},save(){},render(){},announce(){}};
+vm.createContext(ctx);vm.runInContext(addSource,ctx);
+ctx.addBottle();ctx.addBottle();ctx.addBottle();
+assert.equal(ctx.state.warehouse.slots.filter(Boolean).length,3,'Three taps add exactly three products');
+ctx.addBottle('mojito',0);
+assert.equal(ctx.state.warehouse.slots[0],'kvass','Occupied destination is never overwritten or removed');
+assert.equal(ctx.state.warehouse.slots.filter(Boolean).length,3);
+ctx.addBottle('mojito',5);
+assert.equal(ctx.state.warehouse.slots[5],'mojito','Explicit free destination is filled');
+ctx.addBottle('kvass');ctx.addBottle('mojito');
+assert.equal(valid(ctx.state.warehouse.slots),true,'Empty slots are filled without losing existing products');
+ctx.addBottle('kvass');assert.equal(ctx.state.warehouse.slots.filter(Boolean).length,6,'Full box cannot change');
+ctx.state.warehouse.slots[1]=null;ctx.addBottle('unknown');assert.equal(ctx.state.warehouse.slots[1],null,'Unknown product cannot fill a hole');
+ctx.addBottle('kvass');assert.equal(valid(ctx.state.warehouse.slots),true,'Removed product can be replaced');
+ctx.state.warehouse.phase='shipping';ctx.state.warehouse.slots[1]=null;ctx.addBottle('kvass');assert.equal(ctx.state.warehouse.slots[1],null,'Shipping box cannot mutate');
+console.log('PASS: 9 add-control checks (one change per tap, no implicit removal, explicit destinations, holes, closed box).');

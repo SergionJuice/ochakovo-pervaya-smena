@@ -1,0 +1,16 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const ctx={document:{addEventListener(){}},window:{}};vm.createContext(ctx);vm.runInContext(fs.readFileSync('public/education.js','utf8'),ctx);
+assert.equal(ctx.searchEducation('  рту   МиРэА ').length,2);
+assert.equal(ctx.searchEducation('биотехнологический университет')[0].id,'rosbiotech');
+assert.equal(ctx.searchEducation('технологический колледж')[0].id,'rosbiotech-college');
+assert.equal(ctx.searchEducation('МИРЭА Ставрополь')[0].id,'mirea-stavropol');
+assert.equal(ctx.searchEducation('несуществующий университет').length,0);
+assert.equal(ctx.normalizeEducation('Ёж  ЕЖ'),ctx.normalizeEducation('еж ёж'));
+assert.equal(ctx.dateToISO('17052004'),'2004-05-17');assert.equal(ctx.dateToISO('17.05.2004'),'2004-05-17');
+assert.equal(ctx.dateToDisplay('2004-05-17'),'17.05.2004');assert.equal(ctx.dateToDisplay('17.05'),'17.05');
+vm.runInContext(fs.readFileSync('public/data.js','utf8'),ctx);
+const valid={name:'Мария Тестовая',contact:'test@example.test',dob:ctx.dateToISO('29022004'),job:'lab',readiness:'Готов(а) сейчас',education:'Мой колледж — Москва'};
+assert.deepEqual(JSON.parse(JSON.stringify(ctx.validate(valid,new Date('2026-10-23')))),{});
+assert.ok(ctx.validate({...valid,dob:ctx.dateToISO('31022004')}).dob);
+assert.ok(ctx.validate({...valid,dob:ctx.dateToISO('23102010')},new Date('2026-10-23')).dob);
+console.log('PASS: directory alias/partial/city/case/space/ё/no-results; explicit date format, eight digits, leap day, invalid dates and age.');
