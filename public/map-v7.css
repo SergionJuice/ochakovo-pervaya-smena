@@ -1,0 +1,90 @@
+/* Compact map: one scalable backdrop, three fixed semantic controls. */
+.factory-map-page.map-v7.scroll-page {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:8px 10px max(8px,env(safe-area-inset-bottom));
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-gutter:auto;
+  background:#fff;
+}
+.map-v7 .map-heading {padding:0;background:transparent;flex:none;}
+.map-v7 .map-heading h1 {font-size:1.5rem;line-height:1.15;margin:0 0 3px;letter-spacing:-.035em;}
+.map-v7 .map-heading>p {font-size:1rem;line-height:1.3;margin:0;max-width:none;}
+.map-v7 .map-topline {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:5px;}
+.map-v7 .map-progress {font-size:.875rem;line-height:1.25;gap:6px;white-space:normal;}
+.map-v7 .map-progress-dots {gap:3px;flex-shrink:0;}
+.map-v7 .map-progress-dots i {width:13px;height:13px;font-size:10px;}
+.map-v7 .map-practice {min-height:48px;min-width:90px;padding:8px 10px;font-size:.875rem;line-height:1.15;flex-shrink:0;}
+.map-v7 .map-canvas {
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-rows:repeat(3,minmax(min-content,1fr));
+  align-items:center;
+  gap:10px;
+  width:100%;
+  margin:0;
+  padding:12px 10px;
+  aspect-ratio:auto;
+  min-height:218px;
+  flex:1 0 auto;
+  border:2px solid var(--ink);
+  border-radius:15px;
+  isolation:isolate;
+  background:#dce3cc;
+}
+.map-v7 .factory-territory {position:absolute;inset:0;width:100%;height:100%;max-width:none;pointer-events:none;}
+.map-v7 .map-area {
+  position:relative;
+  inset:auto;
+  width:86%;
+  max-width:310px;
+  min-width:0;
+  height:auto;
+  min-height:56px;
+  padding:0;
+  display:block;
+  align-self:center;
+  border:0;
+  border-radius:11px;
+  background:transparent;
+  z-index:2;
+}
+.map-v7 .map-area-lab,.map-v7 .map-area-warehouse {justify-self:start;}
+.map-v7 .map-area-line {justify-self:end;}
+.map-v7 .map-area-sign {
+  min-height:56px;
+  width:100%;
+  padding:7px 9px;
+  gap:9px;
+  background:rgba(255,253,245,.92);
+  border:2px solid var(--ink);
+  border-radius:10px;
+  box-shadow:0 3px 0 var(--ink);
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+}
+.map-v7 .map-area-icon {width:32px;height:34px;flex:0 0 32px;background:transparent;border-radius:0;}
+.map-v7 .map-area-icon img {width:32px;height:32px;object-fit:contain;}
+.map-v7 .map-area-text {gap:3px;min-width:0;}
+.map-v7 .map-area-text>b {font-size:1rem;line-height:1.15;letter-spacing:-.025em;overflow-wrap:normal;}
+.map-v7 .map-area-text>span {font-size:.85rem;line-height:1.15;gap:4px;color:#b6002b;}
+.map-v7 .map-area.completed .map-area-text>span {color:#245841;}
+.map-v7 .map-area.completed .map-area-sign {border-color:#245841;box-shadow:0 3px 0 #245841;}
+.map-v7 .map-area:focus-visible {outline:3px solid #006bc6;outline-offset:3px;}
+.map-v7 .map-area:active .map-area-sign {transform:translateY(2px);box-shadow:0 1px 0 var(--ink);}
+.map-v7 .map-bottom {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:0;min-height:48px;flex:none;background:transparent;}
+.map-v7 .map-rita {display:flex;align-items:center;gap:5px;margin:0;min-width:0;}
+.map-v7 .map-rita .mentor {position:static;flex:0 0 42px;width:42px;height:42px;margin:0;}
+.map-v7 .map-rita p {border:0;border-radius:0;background:none;padding:0;font-size:.875rem;line-height:1.2;}
+.map-v7 .map-rita p b {display:block;font-size:.8rem;margin:0 0 2px;color:#a82039;}
+.map-v7 .map-motion {width:auto;min-width:112px;min-height:48px;padding:8px 10px;gap:6px;font-size:.875rem;line-height:1.2;flex:none;}
+.map-v7 .map-motion>span {max-width:7rem;}
+.map-v7 .map-results {min-height:48px;padding:8px 11px;font-size:1rem;line-height:1.2;border-width:2px;box-shadow:0 3px 0 var(--ink);}
+/* Intrinsic row sizes grow with text zoom. The enclosing main scrolls naturally
+   instead of clipping or reducing text / touch targets. */
+@media (prefers-reduced-motion:reduce) {.map-v7 .map-canvas * {animation:none!important;transition:none!important;}}
+.map-v7.map-still *,.map-v7 .map-still * {animation:none!important;transition:none!important;}
+.page-hidden .map-v7 .map-canvas *,.paused .map-v7 .map-canvas * {animation-play-state:paused!important;}
