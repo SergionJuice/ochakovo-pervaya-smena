@@ -1,0 +1,4 @@
+import {runtime,json,hrAccess,sameOrigin,readJson} from '../../../../lib/server';
+import {deliverNotification,mailConfigured} from '../../../../lib/mail.mjs';
+export const dynamic='force-dynamic';
+export async function POST(req:Request){if(!sameOrigin(req))return json({error:'forbidden'},403);const {authorized}=await hrAccess(req);if(!authorized)return json({error:'access_denied'},403);try{const env=runtime();if(env.APPLICATION_DELIVERY!=='email'||!mailConfigured(env))return json({message:'Заявки принимаются в HR-кабинете.'},503);const data=await readJson(req,1000);if(typeof data.id!=='string')return json({message:'Не указана заявка.'},400);const result=await deliverNotification(env.DB,env,data.id);return json({notification:result})}catch{return json({message:'Не удалось повторить отправку. Заявка сохранена.'},503)}}
