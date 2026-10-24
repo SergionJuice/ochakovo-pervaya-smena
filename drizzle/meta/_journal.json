@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1792781182940,
+      "tag": "0000_typical_romulus",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792845493651,
+      "tag": "0001_previous_amazoness",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792848753507,
+      "tag": "0002_simple_lake",
+      "breakpoints": true
+    }
+  ]
+}
